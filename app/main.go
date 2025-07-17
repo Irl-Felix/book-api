@@ -33,13 +33,17 @@ func main() {
 
 func healthHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
+	if _, err := w.Write([]byte("OK")); err != nil {
+		log.Printf("⚠️ Failed to write health check response: %v", err)
+	}
 }
 
 func booksHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		json.NewEncoder(w).Encode(books)
+		if err := json.NewEncoder(w).Encode(books); err != nil {
+			log.Printf("⚠️ Failed to encode books: %v", err)
+		}
 	case http.MethodPost:
 		var b Book
 		if err := json.NewDecoder(r.Body).Decode(&b); err != nil {
@@ -50,7 +54,9 @@ func booksHandler(w http.ResponseWriter, r *http.Request) {
 		books = append(books, b)
 		go autoRemoveBook(b.ID, 2*time.Minute)
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(b)
+		if err := json.NewEncoder(w).Encode(b); err != nil {
+			log.Printf("⚠️ Failed to encode created book: %v", err)
+		}
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
@@ -68,7 +74,9 @@ func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		for _, b := range books {
 			if b.ID == id {
-				json.NewEncoder(w).Encode(b)
+				if err := json.NewEncoder(w).Encode(b); err != nil {
+					log.Printf("⚠️ Failed to encode book by ID: %v", err)
+				}
 				return
 			}
 		}
@@ -83,7 +91,9 @@ func bookByIDHandler(w http.ResponseWriter, r *http.Request) {
 			if b.ID == id {
 				updated.ID = id
 				books[i] = updated
-				json.NewEncoder(w).Encode(updated)
+				if err := json.NewEncoder(w).Encode(updated); err != nil {
+					log.Printf("⚠️ Failed to encode updated book: %v", err)
+				}
 				return
 			}
 		}
