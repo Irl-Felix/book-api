@@ -52,8 +52,11 @@ func TestBooksHandler_Post(t *testing.T) {
 	}
 
 	var result Book
-	err := json.NewDecoder(rr.Body).Decode(&result)
-	if err != nil || result.Title != newBook.Title {
+	if err := json.NewDecoder(rr.Body).Decode(&result); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
+
+	if result.Title != newBook.Title {
 		t.Errorf("Expected book with title '%s', got '%s'", newBook.Title, result.Title)
 	}
 }
@@ -90,7 +93,9 @@ func TestBookByIDHandler_Put(t *testing.T) {
 	}
 
 	var result Book
-	json.NewDecoder(rr.Body).Decode(&result)
+	if err := json.NewDecoder(rr.Body).Decode(&result); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
 	if result.Title != update.Title {
 		t.Errorf("Expected updated title '%s', got '%s'", update.Title, result.Title)
 	}
