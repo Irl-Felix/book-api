@@ -28,7 +28,7 @@ jobs:
             go build -o book-api-service app/main.go
 
         - name: Run tests
-          run: go test app/...
+          run: go test ./app
 
     code-quality:
         runs-on: ubuntu-latest
@@ -40,7 +40,8 @@ jobs:
         - name: Run golangci-lint
           run: |
               go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
-              golangci-lint run app/...
+              export PATH=$PATH:$(go env GOPATH)/bin
+              golangci-lint run ./app
 
     docker:
         runs-on: ubuntu-latest
